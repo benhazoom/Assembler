@@ -6,11 +6,11 @@
 #include <string.h>
 #define MAX_FILE_NAME_SIZE 100
 #define LINEMAXSIZE 81 /*including '\0'*/
-#define DATA_IMAGE_SIZE 80/*for code image, as said in page 44 of maman 14 instruction - we allowed to assume arrays for code image*/
-#define CODE_IMAGE_SIZE 80/*for data image, as said in page 33 of maman 14 instruction.*/
+#define DATA_IMAGE_SIZE 80/*for data image, as said in page 33 of maman 14 instruction.*/
+#define CODE_IMAGE_SIZE 80/*for code image, as said in page 44 of maman 14 instruction - we allowed to assume arrays for code image*/
+
 #define CODE 61
 #define DATA 401
-#define DONTCHANGE 331
 
 typedef struct CodeWords
 {
