@@ -1,17 +1,16 @@
-/*Symbols Table*/
-/*This table manages the symbols around the code, data counter and instruction counter */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #define MAX_FILE_NAME_SIZE 100
 #define LINEMAXSIZE 81 /*including '\0'*/
-#define DATA_IMAGE_SIZE 80/*for data image, as said in page 33 of maman 14 instruction.*/
-#define CODE_IMAGE_SIZE 80/*for code image, as said in page 44 of maman 14 instruction - we allowed to assume arrays for code image*/
+#define DATA_IMAGE_SIZE 80/*for data image
+#define CODE_IMAGE_SIZE 80/*for code image
 
 #define CODE 61
 #define DATA 401
 
+/*This data structure represents a full code word (worm) made of 32 bits that veries in it's structure according to the specific code word type(R/I/L)*/
 typedef struct CodeWords
 {
     int WordIC;
@@ -43,6 +42,7 @@ typedef struct CodeWords
     }Word;
 }CodeWords;
 
+/*This data structure represents a symbol (code/data lable) with additional fields for entry/external origin*/
 typedef struct symbol
 {
     char name[31];
@@ -52,21 +52,27 @@ typedef struct symbol
     int External;/*0 for not external, 1 for external*/
     struct symbol *link;
 }symbol;
-/*A method for displaying symbol table*/
+
+/*Symbol Table*/
+/*As defined, the symbols is arranged as a 'linked-list' reffered as 'symbol table' that manages the symbols around the code*/
+
+/*A method for displaying a symbol table*/
+/*each file has its own symbol table and this method is used to show each lables: name,value(adress), type(code/data),isEntry?,isExternal? */
+/*displaing a chart is NOT a crucial part of the Assembler activity but it is important to display it when debugging the program*/
 void display(symbol start)
 {
 	symbol *ptr;
 	ptr = &start;
 	if (ptr == NULL)
-		printf("\nLinklist is empty.\n");
+	    printf("\nLinklist is empty.\n");
 	else
 	{
             printf("Symbol\t\tValue\t\tAttribute\tisEntry\t\tisExternal\n");
-ptr = ptr->link;
-ptr = ptr->link;
+	    ptr = ptr->link;
+	    ptr = ptr->link;
 		while(ptr != NULL)
-        {
-            printf("\n%s\t\t%d\t\t%d\t\t%d\t\t%d\n",ptr->name,ptr->value,ptr->attribute,ptr->Entry,ptr->External);
+                {
+            		printf("\n%s\t\t%d\t\t%d\t\t%d\t\t%d\n",ptr->name,ptr->value,ptr->attribute,ptr->Entry,ptr->External);
 			ptr = ptr->link;
 		}
 	}
