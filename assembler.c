@@ -4,12 +4,13 @@
 #include <string.h>
 #define MAX_FILE_NAME_SIZE 100
 #define LINEMAXSIZE 81 /*including '\0'*/
-#define DATA_IMAGE_SIZE 80/*for data image
-#define CODE_IMAGE_SIZE 80/*for code image
-
+#define DATA_IMAGE_SIZE 80/*for data image*/
+#define CODE_IMAGE_SIZE 80/*for code image*/
 #define CODE 61
 #define DATA 401
 
+
+/*DEFINING SECTION*/
 /*This data structure represents a full code word (worm) made of 32 bits that veries in it's structure according to the specific code word type(R/I/L)*/
 typedef struct CodeWords
 {
@@ -56,6 +57,7 @@ typedef struct symbol
 /*Symbol Table*/
 /*As defined, the symbols is arranged as a 'linked-list' reffered as 'symbol table' that manages the symbols around the code*/
 
+
 /*A method for displaying a symbol table*/
 /*each file has its own symbol table and this method is used to show each lables: name,value(adress), type(code/data),isEntry?,isExternal? */
 /*displaing a chart is NOT a crucial part of the Assembler activity but it is important to display it when debugging the program*/
@@ -101,6 +103,9 @@ typedef struct dataWords
         }dw;
     }dataType;
 }dataWords;
+/*END OF DEFINING SECTION*/
+
+
 /*Global Veriables*/
     int DC,DCF;/*data counter*/
     int items;
@@ -115,7 +120,6 @@ typedef struct dataWords
     int dataImageCounter=0;
     int bitsLine[32];
     int k;
-
     FILE *InputFilePointer;
     FILE *obFilePointer;
     FILE *entFilePointer;
@@ -125,6 +129,8 @@ typedef struct dataWords
     int extOpened;
     int entOpened;
 
+
+/*METHODS FOR LABLE TYPE CHECKING */
 /*A method for checking if a symbol is R type*/
 int isR(char symbolName[])
 {
@@ -170,7 +176,10 @@ if(
    strcmp(symbolName,"stop")==0
    ) return 1;else return 0;
 }
-/*A method for checking if a letter is a low case letter for maman 14 project*/
+
+
+/*METHODS FOR CHAR TYPE CHECKING*/
+/*A method for checking if a letter is a low case letter*/
 int IsLowcase(char next)
 {
 if(next>=97&&next<=122) return 1;else return 0;
@@ -189,7 +198,11 @@ int charToDecimal (char a)
 {
     return a-48;
 }
-/*A method for checking if data contant is valid*/
+
+
+/*This method checks if data contant in a certain data line is valid (for example .dh --32 is not valid line)*/
+/*if valid it returnes the number of the commas in the line and with that information we can tell how many veriables there are in the line*/
+/*if not valid it returnes -1*/ 
 int contantCheck(char contant[],int lineNumber,char dataInstruction[])
 {
     int i,z,commaCounter=0,mul=1,value=0;
@@ -273,6 +286,10 @@ int AdressOfLable(char lableName[],int linenumber)
     return -1;
 
 }
+
+
+/*COMMAND PROCCECING COMMANDS*/
+/*These commands proccesses the command lines into a CodeWord for later converting to obj machine code*/
 /*A method for processing an R command*/
 void Rcommand(int funct,int opcode,char contant[],int lineNumber)
 {
@@ -443,6 +460,8 @@ number[0]=0; number[1]=0;/*reseting register value for next register*/
 CodeImage[codeImageCounter].type=1;/*R type*/
 codeImageCounter++;
 }/*End of R commands*/
+
+
 /*A method for processing an I command*/
 void Icommand(int opcode,char contant[],int lineNumber)
 {
@@ -795,6 +814,8 @@ if((opcode>=19)&&(opcode<=24))
 CodeImage[codeImageCounter].type=2;/*I type*/
 codeImageCounter++;
 }
+
+
 /*A method for processing an J command*/
 void Jcommand(int opcode,char contant[],int lineNumber)
 {
@@ -927,15 +948,11 @@ void command(char commandName[],char Contant[],int lineNumber)
    if (strcmp(commandName,"stop")==0)Jcommand(63,Contant,lineNumber);
 
 }
+/*END OF COMMAND PROCCECING COMMANDS*/
 
 
 
-
-                                                                        /*SYMBOL TABLE METHODS*/
-
-
-
-
+/*SYMBOL TABLE METHODS*/
 /*A method for inserting a symbol to a symbol table linked list*/
 void insert_last(symbol start,char newName[],int newValue,int newAttribute,int isEntry,int isExternal)
 {
@@ -1164,7 +1181,14 @@ int isExternal(char lableName[],int linenumber)
     }
     return -1;
 }
+/*END OF SYMBOL TABLE COMMANDS*/
 
+
+/*-----------------------------------------------------PARSING SECTION------------------------------------------------------*/
+/*This section goes thru the as file twice*/
+/*First go-thru goes thru the as file and settes as much information it can in the symbol-table and in the data and code image arrays*/
+/*Some information cannot be set during the first go thru*/
+/*for example the command "jmp Finish" - the adress of the lable 'Finish' is not yet defined*/
 
 /*A method for parsing one line from the input file at a time*/
 int LineParsing(char line[],int lineNumber)
@@ -1465,6 +1489,7 @@ return 0;
 }/*End of line parsisng*/
 
 /*A method for completing a certain command if spotted in a certain line via "SecoundLineParsing" method*/
+/*This method also makes the .ext file*/
 void CommandCompletion(char commandName[],char contant[],int lineNumber)
 {
 	int i,z,commaCounter,LableExistsInSymbolTable;
@@ -1698,7 +1723,6 @@ IC=100;
 DC=ICF;
 
     /*Opening text file to read from*/
-
     InputFilePointer = fopen(assemblyFileName, "r");
     if (InputFilePointer == NULL)
     {
@@ -1720,11 +1744,15 @@ if (extOpened==1)
 {
 if (fclose(extFilePointer) == EOF)
 {
-printf("Error in closing the Input file\n");
+printf("Error in closing the External file\n");
 }
 }
 
 }
+/*END OF PARSING SECTION*/
+
+
+/*MACHINE CODE METHODS*/
 /*A method for filling a certain part of a data or code line for later convertion to hex output*/
 void lineFiller(int line[],int fromIndex,int toIndex,int number)
 {
@@ -1810,6 +1838,7 @@ void dataBinaryToHex(int line [])
         fprintf(obFilePointer,"%X%X ",Hexes[0],Hexes[1]);
         IC++;
 }
+
 /*A method for Outputing an "obj" file for a certain "as" Input file*/
 void Object()
 {
@@ -1886,7 +1915,10 @@ void Object()
                     {
                         printf("Error in closing the ob Output file\n");
                     }
-            }
+}
+/*END OF MACHINE CODE METHODS*/
+
+
 
 /*A method for going throu the input file and to start filling what can be filled in the code and data image*/
 /*And for making a symbol table so we can use it to complete filling the code and data images ,and execute outputs*/
@@ -1896,8 +1928,6 @@ void FirstGoThrou()
 int lineNumber;
 char line[81];
 lineNumber=0;
-
-
 strcpy(assemblyFileName,fileName);
 strcat(assemblyFileName,".as");
 /*Opening text file to read from*/
@@ -1920,7 +1950,10 @@ if (fclose(InputFilePointer) == EOF)
 printf("Error in closing the Input file\n");
 }
 }
-/*main method*/
+
+
+
+/*--------------------------------------------------MAIN METHOD--------------------------------------------------*/
 int main (int argc, char *argv[])
 {
 int i;
@@ -1965,15 +1998,3 @@ while(i!=argc)
 }
 return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
